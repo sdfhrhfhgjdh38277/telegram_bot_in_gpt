@@ -1,7 +1,7 @@
 import g4f
 import telebot as tele
 
-bot = tele.TeleBot("6719622488:AAEvOetK4PPPJs8a8LMqZAke5isOHFLMzpg")
+bot = tele.TeleBot("You_token")
 
 
 @bot.message_handler(commands=["start"])
