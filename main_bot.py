@@ -10,14 +10,14 @@ bot = tele.TeleBot(cfg.config['token'])
 @bot.message_handler(commands=["start"])
 def start(message):
     # hello message
-    bot.reply_to(
-        message,
+    bot.send_message(
+        message.chat.id,
         "Привет, я чат-бот основанный на ChatGPT-4. Ты можешь задать мне любой вопрос! Я отвечу на него."
         "\nHо я могу не слишком точно давать ответы, поэтому прости если что-то будет не так!",
     )
 
 
-@bot.message_handler(content_types=["text"])
+@bot.message_handler(commands=['search'])
 def ask_gpt(message):
     # create generate model, and send generated message to user
     response = g4f.ChatCompletion.create(
