@@ -1,36 +1,43 @@
-#  import, token to bot
-import g4f
-import telebot as tele
-from time import time
+# imports
+import asyncio
 import configure as cfg
+import logging
+import tracemalloc
+import g4f
+from aiogram import Bot, Dispatcher
+from aiogram.types import Message
+from aiogram.filters import CommandStart, Command
 
-bot = tele.TeleBot(cfg.config['token'])
+TOKEN_API = cfg.config["token"]  # Bot token
+dp = Dispatcher()
+tracemalloc.start()
 
 
-@bot.message_handler(commands=["start"])
-def start(message):
-    # hello message
-    bot.send_message(
-        message.chat.id,
-        "Привет, я чат-бот основанный на ChatGPT-4. Ты можешь задать мне любой вопрос! Я отвечу на него."
-        "\nHо я могу не слишком точно давать ответы, поэтому прости если что-то будет не так!",
+@dp.message(CommandStart())
+async def start(message: Message):
+    await message.answer(
+        "Привет. Я твой карманный помощник на ближайшие запросы! Задай мне вопрос через команду /search (запрос), "
+        "и я в течении минуты напишу тебе ответ!"
     )
 
 
-@bot.message_handler(commands=['search'])
-def ask_gpt(message):
-    # create generate model, and send generated message to user
-    response = g4f.ChatCompletion.create(
+async def main() -> None:
+    bot = Bot(TOKEN_API)
+    await dp.start_polling(bot)
+
+
+@dp.message(Command("search"))
+async def generation(message: Message):
+    response = await g4f.ChatCompletion.create_async(
         model=g4f.models.gpt_4,
-        messages=[
-            {
-                "role": "user",
-                "content": message.text,
-            }
-        ],
+        messages=[{"role": "user", "content": message.text}],
     )
-    bot.reply_to(message, response)
-    print(f"Request generated in: {time()}")
+    await message.answer(response)
 
 
-bot.infinity_polling()
+if __name__ == "__main__":
+    logging.basicConfig(level=logging.INFO)
+    try:
+        asyncio.run(main())
+    except KeyboardInterrupt:
+        print("exit")
