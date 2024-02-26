@@ -1,43 +1,46 @@
-# imports
-import asyncio
-import configure as cfg
-import logging
-import tracemalloc
+#  import, token to bot
 import g4f
-from aiogram import Bot, Dispatcher
-from aiogram.types import Message
-from aiogram.filters import CommandStart, Command
+import logging
+import telebot as tele
+from time import time
+import configure as cfg
 
-TOKEN_API = cfg.config["token"]  # Bot token
-dp = Dispatcher()
-tracemalloc.start()
+bot = tele.TeleBot(cfg.config["token"])
 
 
-@dp.message(CommandStart())
-async def start(message: Message):
-    await message.answer(
-        "Привет. Я твой карманный помощник на ближайшие запросы! Задай мне вопрос через команду /search (запрос), "
-        "и я в течении минуты напишу тебе ответ!"
+@bot.message_handler(commands=["start"])
+def start(message):
+    # hello message
+    bot.send_message(
+        message.chat.id,
+        "Привет. Я твой карманный помощник на ближайшие запросы! Задай мне вопрос через команду /search (запрос),"
+        "и я в течении минуты напишу тебе ответ!",
     )
 
 
-async def main() -> None:
-    bot = Bot(TOKEN_API)
-    await dp.start_polling(bot)
-
-
-@dp.message(Command("search"))
-async def generation(message: Message):
-    response = await g4f.ChatCompletion.create_async(
+@bot.message_handler(commands=["search"])
+def ask_gpt(message):
+    # send waiting message
+    msg_wait = bot.send_message(
+        message.chat.id, "Тааак, интересненько... дай-ка подумаю🤫"
+    )
+    msg_id = msg_wait.id
+    # create generate model, and send generated message to user
+    response = g4f.ChatCompletion.create(
         model=g4f.models.gpt_4,
-        messages=[{"role": "user", "content": message.text}],
+        messages=[
+            {
+                "role": "user",
+                "content": message.text,
+            }
+        ],
     )
-    await message.answer(response)
+    bot.delete_message(message.chat.id, msg_id)
+    bot.reply_to(message, response)
+    print(f"Request generated in: {time()}")
 
 
 if __name__ == "__main__":
-    logging.basicConfig(level=logging.INFO)
-    try:
-        asyncio.run(main())
-    except KeyboardInterrupt:
-        print("exit")
+    logging.basicConfig(level=logging.INFO)  # start loogging bot
+    # start polling to bot work
+    bot.infinity_polling()
