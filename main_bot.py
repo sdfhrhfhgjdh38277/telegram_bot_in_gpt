@@ -6,7 +6,7 @@ from time import time
 import configure as cfg
 
 bot = tele.TeleBot(cfg.config["token"])
-
+logging.basicConfig(filename="py_log.log", filemode="w")
 
 @bot.message_handler(commands=["start"])
 def start(message):
@@ -27,17 +27,13 @@ def ask_gpt(message):
     msg_id = msg_wait.id
     # create generate model, and send generated message to user
     response = g4f.ChatCompletion.create(
-        model=g4f.models.gpt_4,
-        messages=[
-            {
-                "role": "user",
-                "content": message.text,
-            }
-        ],
+        model=g4f.models.gemini_pro,
+        messages=[{"role": "user", "content": message.text}],
     )
     bot.delete_message(message.chat.id, msg_id)
     bot.reply_to(message, response)
-    print(f"Request generated in: {time()}")
+    print(f"Request generated. Time (now): {time()}")
+
 
 
 if __name__ == "__main__":
