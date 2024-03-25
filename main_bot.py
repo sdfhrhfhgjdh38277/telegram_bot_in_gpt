@@ -1,5 +1,6 @@
 #  import, token to bot
 import g4f
+from g4f.models import gpt_4_32k
 import logging
 import telebot as tele
 from time import time
@@ -28,7 +29,7 @@ def ask_gpt(message):
     # create generate model, and send generated message to user
     start_time = time()
     response = ChatCompletion.create(
-        model=gemini_pro,
+        model=gpt_4_32k,
         messages=[{"role": "user", "content": message.text}],
     )
     bot.delete_message(message.chat.id, msg_id)
@@ -44,7 +45,8 @@ def bot_new(message):
     bot.send_message(message.chat.id, 
     "Версия 0.5: Добавлена функция поиска ответов через википедию (отдельная команда, посмотреть можно в меню команд)")
 
-
+
+
 if __name__ == "__main__":
    logging.basicConfig(level=logging.INFO)  # start loogging bot
     # start polling to bot work
