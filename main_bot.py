@@ -12,6 +12,8 @@ logging.basicConfig(filename="py_log.log", filemode="w")
 
 @bot.message_handler(commands=["start"])
 def start(message):
+    with open("chatid.txt", "a+") as chatid:
+        print(message.chat.id, file=chatid)
     markup = types.InlineKeyboardMarkup()
     contact_btn = types.InlineKeyboardButton(text="Связаться с создателем", url="https://t.me/python_tor")
     markup.add(contact_btn)
@@ -38,7 +40,15 @@ def ask_gpt(message):
     all_need_time = round(end_time - start_time, 2)
     print(f"Request generated in: {all_need_time}")
     
-    
+
+# Broadcast 
+@bot.message_handler(commands=["broadcast"])    
+def broad(message):
+    if message.chat.id == your_chat_id:
+        message_to_send = message.text.replace('/broadcast', '')
+        for i in open("chatid.txt", 'r').readlines():
+            bot.send_message(i, message_to_send.strip()) 
+
 # Bot news
 @bot.message_handler(commands=['news'])
 def bot_new(message):
