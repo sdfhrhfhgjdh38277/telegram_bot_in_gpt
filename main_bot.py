@@ -31,8 +31,9 @@ def ask_gpt(message):
     # create generate model, and send generated message to user
     start_time = time()
     response = ChatCompletion.create(
-        model=gpt_4_32k,
-        messages=[{"role": "user", "content": message.text}],
+        model="gpt-4o",
+        messages=[{"role": "system", "content": "You a helpful assistant",
+role": "user", "content": message.text}],
     )
     bot.delete_message(message.chat.id, msg_id)
     bot_response = bot.reply_to(message, response)
